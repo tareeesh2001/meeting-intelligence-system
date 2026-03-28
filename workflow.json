@@ -1,0 +1,347 @@
+{
+  "name": "Meeting Intelligence System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Meeting Intelligence System",
+        "formDescription": "Submit your meeting notes to automatically extract action items, assign owners, and notify your team.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Meeting Title"
+            },
+            {
+              "fieldLabel": "Date of Meeting"
+            },
+            {
+              "fieldLabel": "Attendees (names and emails, comma separated)"
+            },
+            {
+              "fieldLabel": "Meeting Notes",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "46ce1bac-839e-4e05-bd13-7e152980b7b3",
+      "name": "On form submission",
+      "webhookId": "db610d0a-dd15-46b8-932f-e3b30a2ef444"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an expert Business Analyst. Analyze the following meeting notes and extract all action items.\n\nMeeting Title: {{ $json['Meeting Title'] }}\nDate: {{ $json['Date of Meeting'] }}\nAttendees: {{ $json['Attendees (names and emails, comma separated)'] }}\n\nMeeting Notes:\n{{ $json['Meeting Notes'] }}\n\nExtract and return the following in a structured JSON format ONLY — no other text:\n{\n  \"meeting_title\": \"\",\n  \"meeting_date\": \"\",\n  \"summary\": \"2-3 sentence meeting summary\",\n  \"risks\": \"any risks or concerns raised\",\n  \"action_items\": [\n    {\n      \"task\": \"task description\",\n      \"owner\": \"person's name\",\n      \"owner_email\": \"email if mentioned\",\n      \"deadline\": \"date or timeframe\",\n      \"priority\": \"High/Medium/Low\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e6fe7c94-ee07-4eef-a70b-921d8f9775fd",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "BjvyUFINJwwV1w0G",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.output[0].content[0].text;\n\nconst cleaned = rawText\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nconst parsed = JSON.parse(cleaned);\n\nreturn parsed.action_items.map(item => ({\n  json: {\n    meeting_title: parsed.meeting_title,\n    meeting_date: parsed.meeting_date,\n    summary: parsed.summary,\n    risks: parsed.risks,\n    task: item.task,\n    owner: item.owner,\n    owner_email: item.owner_email,\n    deadline: item.deadline,\n    priority: item.priority\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "f0cbfe50-77de-48fb-9e1a-84c2b7b1cb16",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BtNAVf-_n4fte27IfRF7nsdJThsVj2b0L2qLTS2bMCo",
+          "mode": "list",
+          "cachedResultName": "Meeting Action Items",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BtNAVf-_n4fte27IfRF7nsdJThsVj2b0L2qLTS2bMCo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BtNAVf-_n4fte27IfRF7nsdJThsVj2b0L2qLTS2bMCo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Meeting Title": "={{ $json.meeting_title }}",
+            "Meeting Date": "={{ $json.meeting_date }}",
+            "Task": "={{ $json.task }}",
+            "Owner": "={{ $json.owner }}",
+            "Owner Email": "={{ $json.owner_email }}",
+            "Deadline": "={{ $json.deadline }}",
+            "Priority": "={{ $json.priority }}",
+            "Status": "Pending",
+            "Summary": "={{ $json.summary }}",
+            "Risks": "={{ $json.risks }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Meeting Title",
+              "displayName": "Meeting Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meeting Date",
+              "displayName": "Meeting Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Task",
+              "displayName": "Task",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Owner",
+              "displayName": "Owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Owner Email",
+              "displayName": "Owner Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Risks",
+              "displayName": "Risks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        0
+      ],
+      "id": "6cd24e72-a72b-46a0-bd46-cfa785398682",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DiAmCOHQbqHTm3fr",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Owner Email'] }}",
+        "subject": "=Action Item Assigned: {{ $json['Task'] }} - Due {{ $json['Deadline'] }}",
+        "emailType": "text",
+        "message": "=Hi {{ $json['Owner'] }},  You have been assigned an action item from the {{ $json['Meeting Title'] }} meeting held on {{ $json['Meeting Date'] }}.  \nTASK: {{ $json['Task'] }} \nDEADLINE: {{ $json['Deadline'] }} \nPRIORITY: {{ $json['Priority'] }}  \n\nMEETING SUMMARY: {{ $json['Summary'] }}  \n\nRISKS TO BE AWARE OF: {{ $json['Risks'] }}  \nPlease confirm receipt and update your task status accordingly.  \n\nBest regards, \nMeeting Intelligence System Powered by n8n + OpenAI",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "4db40e7d-dfde-4bde-ba1a-0ebd64629d7b",
+      "name": "Send a message",
+      "webhookId": "d81f9806-07b1-4077-902d-691458207b5b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5rH1kUjlnK3N7jX4",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mulugurutareesh@gmail.com",
+        "subject": "=Meeting Summary: {{ $('On form submission').item.json['Meeting Title'] }} - {{ $('On form submission').item.json['Date of Meeting'] }}",
+        "emailType": "text",
+        "message": "=MEETING INTELLIGENCE REPORT\n============================\nMeeting: {{ $('On form submission').item.json['Meeting Title'] }}\nDate: {{ $('On form submission').item.json['Date of Meeting'] }}\nAttendees: {{ $('On form submission').item.json['Attendees (names and emails, comma separated)'] }}\n\nSUMMARY:\n{{ $('Code in JavaScript').first().json.summary }}\n\nRISKS:\n{{ $('Code in JavaScript').first().json.risks }}\n\nACTION ITEMS:\n--------------\nAll action items have been logged and owners notified individually.\nPlease review the full tracker here:\nhttps://docs.google.com/spreadsheets/d/1BtNAVf-_n4fte27IfRF7nsdJThsVj2b0L2qLTS2bMCo/edit?usp=sharing\n\n{{ $('Code in JavaScript').all().length }} action items logged and owners notified.\n\nMeeting Intelligence System\nPowered by n8n + OpenAI",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "04ca8f51-c5fc-4796-b504-a1b3cb380e78",
+      "name": "Send a message1",
+      "webhookId": "f33863ae-b5d9-4de8-b11d-dd4be045fa6e",
+      "executeOnce": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5rH1kUjlnK3N7jX4",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7ff1b9e9-a908-43b8-a546-18b43164ebf1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "208ffc4de7a95503d9df8657436b8dd11028a7ceb1898c11786afe073e00c312"
+  },
+  "id": "SpONvGhuXfD0kQRj",
+  "tags": []
+}
