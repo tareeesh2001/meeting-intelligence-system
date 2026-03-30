@@ -27,7 +27,7 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.5,
       "position": [
-        0,
+        -160,
         0
       ],
       "id": "46ce1bac-839e-4e05-bd13-7e152980b7b3",
@@ -55,7 +55,7 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 2.1,
       "position": [
-        208,
+        16,
         0
       ],
       "id": "e6fe7c94-ee07-4eef-a70b-921d8f9775fd",
@@ -212,7 +212,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        768,
+        976,
         0
       ],
       "id": "6cd24e72-a72b-46a0-bd46-cfa785398682",
@@ -235,7 +235,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        976,
+        1184,
         0
       ],
       "id": "4db40e7d-dfde-4bde-ba1a-0ebd64629d7b",
@@ -246,7 +246,8 @@
           "id": "5rH1kUjlnK3N7jX4",
           "name": "Gmail OAuth2 API"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -259,7 +260,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1184,
+        1392,
         0
       ],
       "id": "04ca8f51-c5fc-4796-b504-a1b3cb380e78",
@@ -272,6 +273,76 @@
           "name": "Gmail OAuth2 API"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "947a9e8d-45f4-468a-b2a6-e6321cfdf02e",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        0
+      ],
+      "id": "4f835fcb-4349-441e-86cb-30f448dc4f99",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5a78e8ef-174f-45c5-ad66-650ee4139f67",
+              "leftValue": "={{ $json.task }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "9cd15796-97d2-4db6-a6e1-d6f171d509a6",
+      "name": "If1"
     }
   ],
   "pinData": {},
@@ -291,7 +362,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -302,7 +373,7 @@
       "main": [
         [
           {
-            "node": "Append row in sheet",
+            "node": "If1",
             "type": "main",
             "index": 0
           }
@@ -330,14 +401,40 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "3dCstCqBocLqxE67",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
-  "versionId": "7ff1b9e9-a908-43b8-a546-18b43164ebf1",
+  "versionId": "b2ad022c-2b2e-4e4a-9d7a-1c04bedb16ca",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "208ffc4de7a95503d9df8657436b8dd11028a7ceb1898c11786afe073e00c312"
